@@ -1,4 +1,3 @@
-// vars/sendEmail.groovy
 def call(String recipient, String buildStatus, String jobName, String buildNumber, String buildUrl) {
     def emoji = buildStatus == 'SUCCESS' ? '✅' : '⚠️'
     def subject = "${emoji} ${buildStatus}: ${jobName} #${buildNumber}"
@@ -29,13 +28,11 @@ def call(String recipient, String buildStatus, String jobName, String buildNumbe
         </ul>
     """
 
-    def attachLog = buildStatus != 'SUCCESS'
-
     emailext(
         to: recipient,
         subject: subject,
         body: body,
         mimeType: 'text/html',
-        attachLog: attachLog
+        attachLog: buildStatus != 'SUCCESS'
     )
 }
