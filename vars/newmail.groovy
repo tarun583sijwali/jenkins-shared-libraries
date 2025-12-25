@@ -1,19 +1,15 @@
-def sendEmail(String recipient, String buildStatus, String jobName, String buildNumber, String buildUrl) {
+// vars/sendEmail.groovy
+def call(String recipient, String buildStatus, String jobName, String buildNumber, String buildUrl) {
     def emoji = buildStatus == 'SUCCESS' ? '✅' : '⚠️'
     def subject = "${emoji} ${buildStatus}: ${jobName} #${buildNumber}"
 
-    // Get user who triggered the build safely
     def user = "Unknown"
-    def cause = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')
-    if (cause && cause.size() > 0) {
-        user = cause[0].userName
+    def cause = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)
+    if (cause != null) {
+        user = cause.getUserName()
     }
 
-    def body = ""
-    def attachLog = false
-
-    if (buildStatus == 'SUCCESS') {
-        body = """
+    def body = buildStatus == 'SUCCESS' ? """
         <h2>Build Succeeded ✅</h2>
         <p>The build is successful. You have done a good job! 🎉</p>
         <ul>
@@ -22,9 +18,7 @@ def sendEmail(String recipient, String buildStatus, String jobName, String build
           <li><b>Build URL:</b> <a href="${buildUrl}">${buildUrl}</a></li>
           <li><b>Triggered By:</b> ${user}</li>
         </ul>
-        """
-    } else {
-        body = """
+    """ : """
         <h2>Build Failed ⚠️</h2>
         <ul>
           <li><b>Job:</b> ${jobName}</li>
@@ -33,9 +27,9 @@ def sendEmail(String recipient, String buildStatus, String jobName, String build
           <li><b>Console Output:</b> <a href="${buildUrl}console">${buildUrl}console</a></li>
           <li><b>Triggered By:</b> ${user}</li>
         </ul>
-        """
-        attachLog = true  
-    }
+    """
+
+    def attachLog = buildStatus != 'SUCCESS'
 
     emailext(
         to: recipient,
@@ -45,5 +39,3 @@ def sendEmail(String recipient, String buildStatus, String jobName, String build
         attachLog: attachLog
     )
 }
-
-return this
