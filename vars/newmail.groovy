@@ -2,11 +2,11 @@ def sendEmail(String recipient, String buildStatus, String jobName, String build
     def emoji = buildStatus == 'SUCCESS' ? '✅' : (buildStatus == 'FAILURE' ? '⚠️' : '⚠️')
     def subject = "${emoji} ${buildStatus}: ${jobName} #${buildNumber}"
 
-    // Get the user who triggered the build
-    def userId = "Unknown"
-    def causes = currentBuild.rawBuild.getCauses('hudson.model.Cause$UserIdCause')
-    if (causes.size() > 0) {
-        userId = causes[0].getUserName()
+    // Get user who triggered the build
+    def user = "Unknown"
+    def cause = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)
+    if (cause != null) {
+        user = cause.getUserName()
     }
 
     def body = ""
@@ -19,8 +19,8 @@ def sendEmail(String recipient, String buildStatus, String jobName, String build
         <ul>
           <li><b>Job:</b> ${jobName}</li>
           <li><b>Build Number:</b> ${buildNumber}</li>
-          <li><b>Triggered By:</b> ${userId}</li>
           <li><b>Build URL:</b> <a href="${buildUrl}">${buildUrl}</a></li>
+          <li><b>Triggered By:</b> ${user}</li>
         </ul>
         """
     } else {
@@ -29,9 +29,9 @@ def sendEmail(String recipient, String buildStatus, String jobName, String build
         <ul>
           <li><b>Job:</b> ${jobName}</li>
           <li><b>Build Number:</b> ${buildNumber}</li>
-          <li><b>Triggered By:</b> ${userId}</li>
           <li><b>Build URL:</b> <a href="${buildUrl}">${buildUrl}</a></li>
           <li><b>Console Output:</b> <a href="${buildUrl}console">${buildUrl}console</a></li>
+          <li><b>Triggered By:</b> ${user}</li>
         </ul>
         """
         attachLog = true  
