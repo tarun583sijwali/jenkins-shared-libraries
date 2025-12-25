@@ -2,12 +2,17 @@ def call(String recipient, String buildStatus, String jobName, String buildNumbe
     def emoji = buildStatus == 'SUCCESS' ? '✅' : '⚠️'
     def subject = "${emoji} ${buildStatus}: ${jobName} #${buildNumber}"
 
+    // Determine who triggered the build
     def user = "Unknown"
     def cause = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)
     if (cause != null) {
         user = cause.getUserName()
+    } else {
+        // If not a user, get all causes and join their descriptions
+        user = currentBuild.rawBuild.getCauses().collect { it.shortDescription }.join(', ')
     }
 
+    // Email body
     def body = buildStatus == 'SUCCESS' ? """
         <h2>Build Succeeded ✅</h2>
         <p>The build is successful. You have done a good job! 🎉</p>
@@ -28,6 +33,7 @@ def call(String recipient, String buildStatus, String jobName, String buildNumbe
         </ul>
     """
 
+    // Send email
     emailext(
         to: recipient,
         subject: subject,
