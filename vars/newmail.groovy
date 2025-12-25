@@ -1,12 +1,12 @@
 def sendEmail(String recipient, String buildStatus, String jobName, String buildNumber, String buildUrl) {
-    def emoji = buildStatus == 'SUCCESS' ? '✅' : (buildStatus == 'FAILURE' ? '⚠️' : '⚠️')
+    def emoji = buildStatus == 'SUCCESS' ? '✅' : '⚠️'
     def subject = "${emoji} ${buildStatus}: ${jobName} #${buildNumber}"
 
-    // Get user who triggered the build
+    // Get user who triggered the build safely
     def user = "Unknown"
-    def cause = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)
-    if (cause != null) {
-        user = cause.getUserName()
+    def cause = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')
+    if (cause && cause.size() > 0) {
+        user = cause[0].userName
     }
 
     def body = ""
