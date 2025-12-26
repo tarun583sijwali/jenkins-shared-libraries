@@ -8,7 +8,7 @@ def call(String recipient,
         error "Recipient email is required!"
     }
 
-    def emoji = buildStatus == 'SUCCESS' ? '✅' : '⚠️'
+    def emoji = buildStatus == 'SUCCESS' 
     def subject = "${emoji} ${buildStatus}: ${jobName} #${buildNumber}"
 
     // Get only string data, avoid non-serializable objects
@@ -22,7 +22,7 @@ def call(String recipient,
 
     // Email body
     def body = buildStatus == 'SUCCESS' ? """
-        <h2>Build Succeeded ✅</h2>
+        <h2>Build Succeeded: <span style="color:blue;">SUCCESS</span></h2>
         <p>The build is successful. Great job! 🎉</p>
         <ul>
           <li><b>Job:</b> ${jobName}</li>
@@ -31,7 +31,7 @@ def call(String recipient,
           <li><b>Triggered By:</b> ${user}</li>
         </ul>
     """ : """
-        <h2>Build Failed ⚠️</h2>
+       <h2>Build Failed: <span style="color:red;">FAILURE</span></h2>
         <ul>
           <li><b>Job:</b> ${jobName}</li>
           <li><b>Build Number:</b> ${buildNumber}</li>
