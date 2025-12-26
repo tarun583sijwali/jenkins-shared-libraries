@@ -1,4 +1,14 @@
-def call(String recipient, String buildStatus, String jobName, String buildNumber, String buildUrl) {
+// vars/newmail.groovy
+def call(String recipient, 
+         String buildStatus = currentBuild.currentResult, 
+         String jobName = env.JOB_NAME, 
+         String buildNumber = env.BUILD_NUMBER, 
+         String buildUrl = env.BUILD_URL) {
+
+    if (!recipient) {
+        error "Recipient email is required!"
+    }
+
     def emoji = buildStatus == 'SUCCESS' ? '✅' : '⚠️'
     def subject = "${emoji} ${buildStatus}: ${jobName} #${buildNumber}"
 
@@ -8,14 +18,13 @@ def call(String recipient, String buildStatus, String jobName, String buildNumbe
     if (cause != null) {
         user = cause.getUserName()
     } else {
-        // If not a user, get all causes and join their descriptions
         user = currentBuild.rawBuild.getCauses().collect { it.shortDescription }.join(', ')
     }
 
     // Email body
     def body = buildStatus == 'SUCCESS' ? """
         <h2>Build Succeeded ✅</h2>
-        <p>The build is successful. You have done a good job! 🎉</p>
+        <p>The build is successful. Great job! 🎉</p>
         <ul>
           <li><b>Job:</b> ${jobName}</li>
           <li><b>Build Number:</b> ${buildNumber}</li>
